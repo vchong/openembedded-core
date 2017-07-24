@@ -320,7 +320,7 @@ class DpkgIndexer(Indexer):
                 release.write("Label: %s\n" % arch)
 
             cmd += "PSEUDO_UNLOAD=1 %s release . >> Release" % apt_ftparchive
-            
+
             index_cmds.append(cmd)
 
             deb_dirs_found = True
@@ -725,18 +725,20 @@ class RpmPM(PackageManager):
         feed_uris = self.construct_uris(self.feed_uris.split(), self.feed_base_paths.split())
 
         uri_iterator = 0
+        idx2 = 0
         channel_priority = 10 + 5 * len(feed_uris) * (len(arch_list) if arch_list else 1)
 
         for uri in feed_uris:
             if arch_list:
                 for arch in arch_list:
-                    bb.note('Adding Smart channel url%d%s (%s)' %
-                            (uri_iterator, arch, channel_priority))
-                    self._invoke_smart('channel --add url%d-%s type=rpm-md baseurl=%s/%s -y'
-                                       % (uri_iterator, arch, uri, arch))
-                    self._invoke_smart('channel --set url%d-%s priority=%d' %
-                                       (uri_iterator, arch, channel_priority))
+                    bb.note('Adding Smart channel url%d%s%d (%s)' %
+                            (uri_iterator, arch, idx2, channel_priority))
+                    self._invoke_smart('channel --add url%d-%s-%d type=rpm-md baseurl=%s/%s -y'
+                                       % (uri_iterator, arch, idx2, uri, arch))
+                    self._invoke_smart('channel --set url%d-%s-%d priority=%d' %
+                                       (uri_iterator, arch, idx2, channel_priority))
                     channel_priority -= 5
+                    idx2 += 1
             else:
                 bb.note('Adding Smart channel url%d (%s)' %
                         (uri_iterator, channel_priority))
